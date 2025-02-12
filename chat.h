@@ -2,34 +2,8 @@
 #include <string>
 #include <vector>
 #include <memory>
-
-class User { // Пользователь
-public:
-	User(const std::string&, const std::string&, const std::string&);
-	~User() = default;
-	void setUserPassword(const std::string&);
-	void setUserName(const std::string&);
-	const std::string& getUserLogin() const;
-	const std::string& getUserPassword();
-	const std::string& getUserName() const;
-private:
-	std::string _login;
-	std::string _password;
-	std::string _name;
-};
-
-class Message { // Сообщение
-public:
-	Message(const std::string&, const std::string&, const std::string&);
-	~Message() = default;
-	const std::string& getText() const;
-	const std::string& getFrom() const;
-	const std::string& getTo() const;
-private:
-	std::string _text;
-	std::string _from;
-	std::string _to;
-};
+#include "user.h"
+#include "message.h"
 
 class Chat {
 public:

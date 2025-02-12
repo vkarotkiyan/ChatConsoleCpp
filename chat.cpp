@@ -1,40 +1,8 @@
 #include <iostream>
 #include <string>
-#include "classes.h"
+#include "chat.h"
 #include "misc.h"
 using namespace  std;
-
-// User ///////////////////////////////////////////////////////////////////////
-User::User(const string& login, const string& password, const string& name) : 
-    _login(login), _password(password), _name(name) { }
-void User::setUserPassword(const string& password){
-    _password = password;
-}
-void User::setUserName(const std::string& name){
-    _name = name;
-}
-const string& User::getUserLogin() const{
-    return _login;
-}
-const string& User::getUserPassword(){
-    return _password;
-}
-const string& User::getUserName() const{
-    return _name;
-}
-
-// Message ////////////////////////////////////////////////////////////////////
-Message::Message(const std::string& text, const std::string& from, const std::string& to) : 
-    _text(text), _from(from), _to(to){ }
-const std::string& Message::getText() const {
-    return _text;
-}
-const std::string& Message::getFrom() const {
-    return _from;
-}
-const std::string& Message::getTo() const {
-    return _to;
-}
 
 // Chat ///////////////////////////////////////////////////////////////////////
 Chat::Chat() { _isWork = true; }
