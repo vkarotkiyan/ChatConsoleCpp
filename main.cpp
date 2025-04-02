@@ -6,11 +6,12 @@ int main(int argc, char* argv[])
 {
     set_cons();
     clear_screen();
+    
     Chat* chat = new Chat();
 
-	while (chat->isWork()) {
-		chat->initMenu();
-	}
+    while (chat->isWork()) {
+        chat->initMenu();
+    }
 
     delete chat;
 

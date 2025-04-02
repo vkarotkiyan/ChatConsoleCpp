@@ -1,23 +1,34 @@
 #include <iostream>
 #include <string>
+#include <limits>
+#include <vector>
 #include "chat.h"
 #include "misc.h"
 using namespace  std;
+
+// Отображение времени в нужном формате
+static const string showTime(const time_t& time) {
+	struct tm* timeinfo;
+	char buffer[80];
+	timeinfo = localtime(&time);
+	strftime(buffer, 80, "%d.%m.%Y %H:%M", timeinfo);
+	return string(buffer);
+}
 
 // Chat ///////////////////////////////////////////////////////////////////////
 Chat::Chat() { _isWork = true; }
 
 bool Chat::isWork() const { return _isWork; }
 
-void Chat::initMenu(){
+void Chat::initMenu() {
 	char oper = '0';
-	do{
+	do {
 		if (!_currentUser) {
 			showUserList();
 			cout << "Регистрация (1) | Вход в чат (2) | Завершение работы (0)" << endl;
 			cin >> oper;
 		}
-		switch (oper){
+		switch (oper) {
 		case '1':
 			try {
 				signUp();
@@ -41,17 +52,17 @@ void Chat::initMenu(){
 	} while (_isWork);
 }
 
-void Chat::login(){
+void Chat::login() {
 	string login, password;
 	char oper;
 	clear_screen();
-	do{
+	do {
 		cout << "Логин: ";
 		cin >> login;
 		cout << "Пароль: ";
 		cin >> password;
 		_currentUser = getUserByLogin(login);
-		if (_currentUser == nullptr || (password != _currentUser->getUserPassword())){
+		if (_currentUser == nullptr || (password != _currentUser->getUserPassword())) {
 			_currentUser = nullptr;
 			cout << "Ошибка входа." << endl;
 			cout << "Нажмите '0' для выхода в меню или любую клавишу для повтора: ";
@@ -63,51 +74,54 @@ void Chat::login(){
 	clear_screen();
 }
 
-void Chat::signUp(){ // Регистрация пользователя
-    string login, password, name;
+void Chat::signUp() { // Регистрация пользователя
+	string login, password, name;
 	clear_screen();
-    cout << "Логин: ";
-    cin >> login;
-    cout << "Пароль: ";
-    cin >> password;
-    cout << "Имя: ";
-    cin >> name;
-    if (getUserByLogin(login) || login == "all"){
-        throw UserLoginExc();
-    }
-    if (getUserByName(name) || name == "all"){
-        throw UserNameExc();
-    }
-    User user = User(login, password, name);
-    _users.push_back(user);
+	cout << "Логин: ";
+	cin >> login;
+	cout << "Пароль: ";
+	cin >> password;
+	cout << "Имя: ";
+	cin >> name;
+	if (getUserByLogin(login) || login == "all") {
+		throw UserLoginExc();
+	}
+	if (getUserByName(name) || name == "all") {
+		throw UserNameExc();
+	}
+//	User user = User(login, password, name);
+//	_users.push_back(user);
+	shared_ptr<User> user(new User(login, password, name)); // Исправлено по рекомендации проверяющего
+	_users.push_back(*user);
 	clear_screen();
 }
 
-void Chat::showUserList() const{
-    cout << "----------------- Список пользователей -----------------" << endl;
-	for (auto& user : _users){
+void Chat::showUserList() const {
+	cout << "----------------- Список пользователей -----------------" << endl;
+	for (auto& user : _users) {
 		cout << user.getUserName() << " (" << user.getUserLogin() << ")";
 		if (_currentUser)
-			if (_currentUser->getUserLogin() == user.getUserLogin()) 
+			if (_currentUser->getUserLogin() == user.getUserLogin())
 				cout << " (активный пользователь)";
 		cout << endl;
 	}
 	cout << "--------------------------------------------------------" << std::endl;
 }
 
-void Chat::userMenu(){
+void Chat::userMenu() {
 	char oper;
 	while (_currentUser) {
 		showUserList();
-		if (!_userForChat) 
+		if (!_userForChat)
 			cout << "Выбрать пользователя для общения (1)";
-		else 
+		else
 			cout << "В общий чат (1) | Поменять собеседника (3)";
 		cout << " | Добавить сообщение (2) | Выход из чата (0)" << endl;
 		showChat();
 		cin >> oper;
-		switch (oper){
+		switch (oper) {
 		case '1':
+			clear_screen(); 
 			if (!_userForChat) setUserForChat();
 			else _userForChat = nullptr;
 			break;
@@ -138,21 +152,21 @@ void Chat::userMenu(){
 	}
 }
 
-shared_ptr<User> Chat::getUserByLogin(const string& login) const{
-	for (auto& user : _users){
+shared_ptr<User> Chat::getUserByLogin(const string& login) const {
+	for (auto& user : _users) {
 		if (login == user.getUserLogin()) return make_shared<User>(user);
 	}
 	return nullptr;
 }
 
-shared_ptr<User> Chat::getUserByName(const string& name) const{
-	for (auto& user : _users){
+shared_ptr<User> Chat::getUserByName(const string& name) const {
+	for (auto& user : _users) {
 		if (name == user.getUserName()) return make_shared<User>(user);
 	}
 	return nullptr;
 }
 
-shared_ptr<User> Chat::getCurrentUser() const{
+shared_ptr<User> Chat::getCurrentUser() const {
 	return _currentUser;
 }
 
@@ -161,7 +175,7 @@ shared_ptr<User> Chat::getUserForChat() const
 	return _userForChat;
 }
 
-void Chat::setUserForChat(){
+void Chat::setUserForChat() {
 	string to;
 	clear_screen();
 	cout << "Введите имя собеседника: ";
@@ -173,36 +187,39 @@ void Chat::setUserForChat(){
 	else _userForChat = getUserByName(to);
 }
 
-void Chat::addMessage(){
+void Chat::addMessage() {
 	string text;
 	cout << ">> ";
-	cin.ignore();
+	//cin.ignore();
+	cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Исправлено по рекомендации проверяющего
 	getline(cin, text);
 	if (!_userForChat)
-		_messages.push_back(Message{ text, _currentUser->getUserLogin(), "all" });
+		_messages.push_back(Message{ text, _currentUser->getUserLogin(), "all", time(0) });
 	else
-		_messages.push_back(Message{ text, _currentUser->getUserLogin(), _userForChat->getUserLogin() });
+		_messages.push_back(Message{ text, _currentUser->getUserLogin(), _userForChat->getUserLogin(), time(0) });
 	clear_screen();
 }
 
-void Chat::showChat() const{ // Вывод списка сообщений. Сообщения активного пользователя ыводятся с отступом.
+void Chat::showChat() const { // Вывод списка сообщений. Сообщения активного пользователя выводятся с отступом.
 	if (!_userForChat)
-		cout << "----------------------------- Общий чат --------------------------------------" << endl;
-	else 
+		cout << "----------------------------- Общий чат -----------------------------------" << endl;
+	else
 		cout << "------------------------- Чат с пользователем " << _userForChat->getUserName() << " ------------------------" << endl;
 	for (auto& mess : _messages) {
 		if (!_userForChat) {
 			if (mess.getTo() == "all") {
-				if (mess.getFrom() == _currentUser->getUserLogin()) cout << "          ";
-				cout << getUserByLogin(mess.getFrom())->getUserName() << ": " << mess.getText() << endl;
+				if (mess.getFrom() == _currentUser->getUserLogin())	cout << "          ";
+				cout << showTime(mess.getTime()) << " " << getUserByLogin(mess.getFrom())->getUserName()
+					 << ": " << mess.getText() << endl;
 			}
 		}
 		else {
-			if ((mess.getFrom() == _currentUser->getUserLogin() && mess.getTo() == _userForChat->getUserLogin()) || 
+			if ((mess.getFrom() == _currentUser->getUserLogin() && mess.getTo() == _userForChat->getUserLogin()) ||
 				(mess.getFrom() == _userForChat->getUserLogin() && mess.getTo() == _currentUser->getUserLogin()))
 			{
 				if (_currentUser->getUserLogin() == mess.getFrom()) cout << "          ";
-				cout << getUserByLogin(mess.getFrom())->getUserName() << ": " << mess.getText() << endl;
+				cout << showTime(mess.getTime()) << " " << getUserByLogin(mess.getFrom())->getUserName()
+					 << ": " << mess.getText() << endl;
 			}
 		}
 	}

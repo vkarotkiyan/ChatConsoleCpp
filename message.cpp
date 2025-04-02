@@ -1,17 +1,27 @@
 #include <string>
+#include <ctime>
 #include "message.h"
+#include "misc.h"
 using namespace  std;
 
 // Message ////////////////////////////////////////////////////////////////////
-Message::Message(const std::string& text, const std::string& from, const std::string& to) : 
-    _text(text), _from(from), _to(to){ }
-const std::string& Message::getText() const {
+Message::Message(const string& text, const string& from, const string& to, const time_t& dateTime) :
+    _text(text), _from(from), _to(to), _dateTime(dateTime) {
+}
+
+const string& Message::getText() const {
     return _text;
 }
-const std::string& Message::getFrom() const {
+
+const string& Message::getFrom() const {
     return _from;
 }
-const std::string& Message::getTo() const {
+
+const string& Message::getTo() const {
     return _to;
 }
 
+const std::time_t& Message::getTime() const
+{
+    return _dateTime;
+}
