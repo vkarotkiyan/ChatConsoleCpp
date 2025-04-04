@@ -39,7 +39,7 @@ public:
 	void showChat() const; // Отображение списка сообщений
 private:
 	bool _isWork = false;
-	std::vector<User> _users; // Массив пользователей
+	std::vector<std::shared_ptr<User>> _users; // Массив пользователей
 	std::vector<Message> _messages; // Массив сообщений
 	std::shared_ptr<User> _currentUser = nullptr; // Активный пользователь
 	std::shared_ptr<User> _userForChat = nullptr; // Пользователь, с которым ведется общение
@@ -53,18 +53,25 @@ private:
 
 ### Замечание 1
 В данную версию внесены следующие исправления:
-1. При регистрации пользователя в функции `Chat::signUp()` во избежание копирования пользователи создаются не на стеке, а в куче 
-с помощью `shared_ptr`. Вместо строк
+1. В обьявлении класса `Chat`
+ ```cpp
+     std::vector<User> _users;
+```
+изменено на 
+```cpp
+    std::vector<std::shared_ptr<User>> _users;
+```
+Теперь `_users` - динамический массив умных указателей. Соответственно в методах `Chat::getUserByLogin` и `Chat::getUserByName` возвращаем просто умный указатель - `return user`.
+2. При регистрации пользователя в функции `Chat::signUp()` во избежание копирования пользователи создаются не на стеке, а в куче 
+с помощью `shared_ptr`. Вместо строки
 ```cpp
 	User user = User(login, password, name);
-	_users.push_back(user);
 ```
-добавлены строки
+добавлена строка
 ```cpp
 	shared_ptr<User> user(new User(login, password, name));
-	_users.push_back(*user);
 ```
-2. В функции `Chat::addMessage()` вместо строки
+3. В функции `Chat::addMessage()` вместо строки
 ```cpp
 	cin.ignore();
 ```

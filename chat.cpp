@@ -90,18 +90,17 @@ void Chat::signUp() { // Регистрация пользователя
 		throw UserNameExc();
 	}
 //	User user = User(login, password, name);
-//	_users.push_back(user);
 	shared_ptr<User> user(new User(login, password, name)); // Исправлено по рекомендации проверяющего
-	_users.push_back(*user);
+	_users.push_back(user);
 	clear_screen();
 }
 
 void Chat::showUserList() const {
 	cout << "----------------- Список пользователей -----------------" << endl;
 	for (auto& user : _users) {
-		cout << user.getUserName() << " (" << user.getUserLogin() << ")";
+		cout << user->getUserName() << " (" << user->getUserLogin() << ")";
 		if (_currentUser)
-			if (_currentUser->getUserLogin() == user.getUserLogin())
+			if (_currentUser->getUserLogin() == user->getUserLogin())
 				cout << " (активный пользователь)";
 		cout << endl;
 	}
@@ -154,14 +153,14 @@ void Chat::userMenu() {
 
 shared_ptr<User> Chat::getUserByLogin(const string& login) const {
 	for (auto& user : _users) {
-		if (login == user.getUserLogin()) return make_shared<User>(user);
+		if (login == user->getUserLogin()) return user;
 	}
 	return nullptr;
 }
 
 shared_ptr<User> Chat::getUserByName(const string& name) const {
 	for (auto& user : _users) {
-		if (name == user.getUserName()) return make_shared<User>(user);
+		if (name == user->getUserName()) return user;
 	}
 	return nullptr;
 }

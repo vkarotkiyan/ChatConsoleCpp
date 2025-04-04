@@ -24,7 +24,8 @@ public:
 	void showChat() const; // Отображение списка сообщений
 private:
 	bool _isWork = false;
-	std::vector<User> _users; // Массив пользователей
+//	std::vector<User> _users;
+	std::vector<std::shared_ptr<User>> _users; // Массив пользователей // Исправлено по рекомендации проверяющего
 	std::vector<Message> _messages; // Массив сообщений
 	std::shared_ptr<User> _currentUser = nullptr; // Активный пользователь
 	std::shared_ptr<User> _userForChat = nullptr; // Пользователь, с которым ведется общение
