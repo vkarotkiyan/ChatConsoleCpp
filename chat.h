@@ -22,6 +22,8 @@ public:
 	void setUserForChat(); // Выбор пользователя для общения
 	void addMessage(); // Ввод сообщения
 	void showChat() const; // Отображение списка сообщений
+	void writeChat(); // Запись данных чата в файлы
+	void readChat(); // Чтение данных чата из файлов
 private:
 	bool _isWork = false;
 //	std::vector<User> _users;

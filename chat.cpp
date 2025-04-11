@@ -1,9 +1,11 @@
 #include <iostream>
 #include <string>
-#include <limits>
 #include <vector>
+#include <filesystem>
+#include <fstream>
 #include "chat.h"
 #include "misc.h"
+namespace fs = std::filesystem;
 using namespace  std;
 
 // Отображение времени в нужном формате
@@ -223,4 +225,65 @@ void Chat::showChat() const { // Вывод списка сообщений. С�
 		}
 	}
 	cout << "---------------------------------------------------------------------------" << endl;
+}
+
+void Chat::writeChat() {
+	fstream user_file_wr = fstream(pathFile(U_FILE), ios::out); // Записываем пользователей в файл
+	if (!user_file_wr)
+		user_file_wr = fstream(pathFile(U_FILE), ios::out | ios::trunc);
+	if (user_file_wr) {
+		fs::permissions(pathFile(U_FILE), fs::perms::group_all | fs::perms::others_all, fs::perm_options::remove);
+		for (auto& user : _users)
+			user_file_wr << user->getUserLogin() << "::" << user->getUserPassword() << "::" << user->getUserName() << endl;
+	}
+	user_file_wr.close();
+	
+	fstream message_file_wr = fstream(pathFile(M_FILE), ios::out); // Записываем сообщения в файл
+	if (!message_file_wr)
+		message_file_wr = fstream(pathFile(M_FILE), ios::out | ios::trunc);
+	if (message_file_wr) {
+		fs::permissions(pathFile(M_FILE), fs::perms::group_all | fs::perms::others_all, fs::perm_options::remove);
+		for (auto& mess : _messages)
+			message_file_wr << mess.getTime() << "::" << mess.getFrom() << "::"	<< mess.getTo() << "::"	<< mess.getText() << endl;
+	}
+	message_file_wr.close();
+}
+
+void Chat::readChat() {
+	fstream user_file_r = fstream(pathFile(U_FILE), ios::in); // Заполняем пользователей
+	if (user_file_r.is_open()) {
+		const string delimiter = "::";
+		string str, login, password, name;
+		while (getline(user_file_r, str)) {
+			size_t end = str.find(delimiter);
+			login = str.substr(0, end);
+			str.erase(str.begin(), str.begin() + end + 2);
+			end = str.find(delimiter);
+			password = str.substr(0, end);
+			name = str.substr(end + 2);
+			shared_ptr<User> user(new User(login, password, name));
+			_users.push_back(user);
+		}
+	}
+	user_file_r.close();
+
+	fstream message_file_r = fstream(pathFile(M_FILE), ios::in); // Заполняем сообщения
+	if (message_file_r.is_open()) {
+		const string delimiter = "::";
+		string str, from, to, text;
+		time_t time;
+		while (getline(message_file_r, str)) {
+			size_t end = str.find(delimiter);
+			time = stoll(str.substr(0, end));
+			str.erase(str.begin(), str.begin() + end + 2);
+			end = str.find(delimiter);
+			from = str.substr(0, end);
+			str.erase(str.begin(), str.begin() + end + 2);
+			end = str.find(delimiter);
+			to = str.substr(0, end);
+			text = str.substr(end + 2);
+			_messages.push_back(Message{ text, from, to, time });
+		}
+	}
+	message_file_r.close();
 }

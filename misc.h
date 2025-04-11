@@ -1,8 +1,12 @@
 #pragma once
 #include <exception>
+#include <cstdlib>
+#include <locale>
 #if defined(_WIN64) || defined(_WIN32)
 #include <windows.h>
 #endif
+constexpr auto U_FILE = "users.txt";
+constexpr auto M_FILE = "messages.txt";
 
 // Настройка консоли для Windows и Linux
 static void set_cons() {
@@ -23,6 +27,16 @@ static void clear_screen() {
 	system("clear");
 #endif
 }
+// Файл с путем 
+static std::string pathFile(const char* file) {
+	#if defined(_WIN64) || defined(_WIN32)
+		std::string str1 = getenv("HOMEDRIVE");
+		std::string str2 = getenv("HOMEPATH");
+		return str1 + str2 + "\\" + (std::string)file;
+	#else
+		return getenv("HOME") + (std::string)"/" + (std::string)file;
+	#endif
+	}
 
 // Exceptions /////////////////////////////////////////////////////////////////
 class UserLoginExc : public std::exception {
