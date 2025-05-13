@@ -1,7 +1,4 @@
-#include <string>
-#include <ctime>
 #include "message.h"
-#include "misc.h"
 using namespace  std;
 
 // Message ////////////////////////////////////////////////////////////////////
@@ -21,7 +18,6 @@ const string& Message::getTo() const {
     return _to;
 }
 
-const std::time_t& Message::getTime() const
-{
+const std::time_t& Message::getTime() const {
     return _dateTime;
 }

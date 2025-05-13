@@ -1,9 +1,7 @@
 #include "chat.h"
-#include "misc.h"
 using namespace  std;
 
-int main(int argc, char* argv[])
-{
+int main(int argc, char* argv[]) {
     set_cons();
     clear_screen();
 

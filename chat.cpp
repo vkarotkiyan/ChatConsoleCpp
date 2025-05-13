@@ -1,21 +1,13 @@
 #include <iostream>
-#include <string>
-#include <vector>
 #include <filesystem>
 #include <fstream>
+#ifdef max
+#undef max
+#endif
 #include "chat.h"
-#include "misc.h"
 namespace fs = std::filesystem;
 using namespace  std;
 
-// Отображение времени в нужном формате
-static const string showTime(const time_t& time) {
-	struct tm* timeinfo;
-	char buffer[80];
-	timeinfo = localtime(&time);
-	strftime(buffer, 80, "%d.%m.%Y %H:%M", timeinfo);
-	return string(buffer);
-}
 
 // Chat ///////////////////////////////////////////////////////////////////////
 Chat::Chat() { _isWork = true; }
@@ -85,6 +77,7 @@ void Chat::signUp() { // Регистрация пользователя
 	cin >> password;
 	cout << "Имя: ";
 	cin >> name;
+	cp1251toUtf8(name);
 	if (getUserByLogin(login) || login == "all") {
 		throw UserLoginExc();
 	}
@@ -181,6 +174,7 @@ void Chat::setUserForChat() {
 	clear_screen();
 	cout << "Введите имя собеседника: ";
 	cin >> to;
+	cp1251toUtf8(to);
 	if (!getUserByName(to)) {
 		cout << "Ошибка: пользователя с именем " << to << " не существует." << endl;
 		return;
@@ -194,6 +188,7 @@ void Chat::addMessage() {
 	//cin.ignore();
 	cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Исправлено по рекомендации проверяющего
 	getline(cin, text);
+	cp1251toUtf8(text);
 	if (!_userForChat)
 		_messages.push_back(Message{ text, _currentUser->getUserLogin(), "all", time(0) });
 	else

@@ -4,6 +4,7 @@
 #include <memory>
 #include "user.h"
 #include "message.h"
+#include "misc.h"
 
 class Chat {
 public:
